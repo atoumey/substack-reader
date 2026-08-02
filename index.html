@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+  <title>Substack Footnote Reader</title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#ff6719">
+  <link rel="stylesheet" href="style.css">
+  <link rel="apple-touch-icon" href="icon-192.png">
+</head>
+<body class="theme-light font-medium">
+
+  <!-- Header Navigation -->
+  <header class="app-header">
+    <div class="header-container">
+      <div class="brand">
+        <span class="logo-icon">🔖</span>
+        <span class="brand-name">Substack Reader</span>
+      </div>
+      <div class="header-controls">
+        <button id="themeToggle" class="icon-btn" title="Toggle Theme" aria-label="Toggle Theme">🌙</button>
+        <button id="fontSizeToggle" class="icon-btn" title="Adjust Text Size" aria-label="Text Size">A<sup>+</sup></button>
+      </div>
+    </div>
+  </header>
+
+  <!-- URL Share / Input Bar -->
+  <section class="url-bar-section">
+    <div class="url-container">
+      <form id="urlForm" class="url-form">
+        <input 
+          type="url" 
+          id="urlInput" 
+          placeholder="Paste or share Substack article URL..." 
+          required 
+          autocomplete="off" 
+          spellcheck="false"
+        >
+        <button type="submit" id="loadBtn" class="primary-btn">Read</button>
+      </form>
+      <div id="shareStatus" class="share-status hidden">
+        Processing shared link...
+      </div>
+    </div>
+  </section>
+
+  <!-- Main Article Area -->
+  <main class="main-content">
+    <div id="welcomeMessage" class="card welcome-card">
+      <h2>Welcome to Substack Footnote Reader</h2>
+      <p>Enjoy reading Substack articles on mobile Chrome with <strong>interactive, working footnotes</strong>.</p>
+      
+      <div class="feature-grid">
+        <div class="feature-item">
+          <span class="feature-icon">📲</span>
+          <div>
+            <strong>Android Share Integration</strong>
+            <p>Tap <em>"Add to Home Screen"</em> in Chrome. You can then send articles directly from the Android Share menu.</p>
+          </div>
+        </div>
+        <div class="feature-item">
+          <span class="feature-icon">💡</span>
+          <div>
+            <strong>Interactive Footnote Popovers</strong>
+            <p>Tapping footnote superscript numbers (e.g. <sup>[1]</sup>) instantly opens a bottom popover without losing your place.</p>
+          </div>
+        </div>
+        <div class="feature-item">
+          <span class="feature-icon">↩️</span>
+          <div>
+            <strong>Jump & Smooth Return</strong>
+            <p>If you jump down to footnotes, a quick float button smoothly brings you back to your exact paragraph.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="loadingSpinner" class="spinner-container hidden">
+      <div class="spinner"></div>
+      <p id="loadingText">Fetching Substack article...</p>
+    </div>
+
+    <div id="errorMessage" class="error-card hidden">
+      <div class="error-icon">⚠️</div>
+      <div class="error-text" id="errorText">Unable to load article.</div>
+      <button id="retryBtn" class="secondary-btn">Try Again</button>
+    </div>
+
+    <!-- Rendered Article -->
+    <article id="articleContainer" class="article-container hidden">
+      <header class="article-header">
+        <h1 id="articleTitle" class="article-title"></h1>
+        <p id="articleSubtitle" class="article-subtitle"></p>
+        <div id="articleMeta" class="article-meta"></div>
+      </header>
+      <div id="articleBody" class="article-body"></div>
+    </article>
+  </main>
+
+  <!-- Footnote Popover Modal / Bottom Sheet -->
+  <div id="footnoteOverlay" class="footnote-overlay hidden" aria-hidden="true">
+    <div class="footnote-bottom-sheet">
+      <div class="sheet-header">
+        <span id="footnoteBadge" class="footnote-badge">Footnote [1]</span>
+        <button id="closeFootnoteBtn" class="close-btn" aria-label="Close footnote">&times;</button>
+      </div>
+      <div id="footnoteContent" class="sheet-body"></div>
+      <div class="sheet-footer">
+        <button id="jumpToFootnoteBtn" class="text-btn">Scroll to bottom footnote &darr;</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Return Button when Jumped -->
+  <button id="returnToTextBtn" class="return-btn hidden" aria-label="Return to reading text">
+    ↩ Back to reading position
+  </button>
+
+  <script src="app.js"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js').catch(err => console.log('SW reg error:', err));
+      });
+    }
+  </script>
+</body>
+</html>
