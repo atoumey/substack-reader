@@ -17,7 +17,9 @@ document.addEventListener('DOMContentLoaded', () => {
   const articleContainer = document.getElementById('articleContainer');
   const articleTitle = document.getElementById('articleTitle');
   const articleSubtitle = document.getElementById('articleSubtitle');
-  const articleMeta = document.getElementById('articleMeta');
+  const authorAvatar = document.getElementById('authorAvatar');
+  const authorName = document.getElementById('authorName');
+  const articleDate = document.getElementById('articleDate');
   const articleBody = document.getElementById('articleBody');
 
   const footnoteOverlay = document.getElementById('footnoteOverlay');
@@ -29,6 +31,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const themeToggle = document.getElementById('themeToggle');
   const fontSizeToggle = document.getElementById('fontSizeToggle');
+  const fontFamilyToggle = document.getElementById('fontFamilyToggle');
 
   // Reading State
   let lastReadingPosition = 0;
@@ -55,6 +58,21 @@ document.addEventListener('DOMContentLoaded', () => {
     document.body.classList.remove(fontSizes[currentFontSizeIdx]);
     currentFontSizeIdx = (currentFontSizeIdx + 1) % fontSizes.length;
     document.body.classList.add(fontSizes[currentFontSizeIdx]);
+  });
+
+  // Font Family Management (Serif vs Sans)
+  let isSerif = true;
+  fontFamilyToggle.addEventListener('click', () => {
+    isSerif = !isSerif;
+    if (isSerif) {
+      document.body.classList.remove('font-sans');
+      document.body.classList.add('font-serif');
+      fontFamilyToggle.textContent = 'Serif';
+    } else {
+      document.body.classList.remove('font-serif');
+      document.body.classList.add('font-sans');
+      fontFamilyToggle.textContent = 'Sans';
+    }
   });
 
   // Check query params for Share Target API
@@ -173,10 +191,12 @@ document.addEventListener('DOMContentLoaded', () => {
       if (res.ok) {
         const json = await res.json();
         if (json.body_html) {
+          const byline = json.publishedBylines?.[0] || {};
           return {
             title: json.title || 'Substack Article',
             subtitle: json.subtitle || '',
-            author: json.publishedBylines?.[0]?.name || parsedUrl.hostname,
+            author: byline.name || json.publication?.name || parsedUrl.hostname,
+            authorPhoto: byline.photo_url || json.publication?.logo_url || '',
             date: json.post_date ? new Date(json.post_date).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' }) : '',
             bodyHtml: json.body_html
           };
@@ -201,10 +221,16 @@ document.addEventListener('DOMContentLoaded', () => {
     const subtitle = doc.querySelector('h3.subtitle, meta[property="og:description"]')?.content || '';
     const bodyEl = doc.querySelector('.available-content, .post-content, .body.markup') || doc.body;
 
+    // Extract Author Photo from HTML meta or avatar elements
+    const authorImgEl = doc.querySelector('.byline-wrapper img, .avatar img, img.author-avatar, img.avatar') ||
+                        doc.querySelector('meta[property="og:image"]');
+    const authorPhoto = authorImgEl ? (authorImgEl.src || authorImgEl.content) : '';
+
     return {
       title,
       subtitle,
-      author: doc.querySelector('.byline-name, meta[name="author"]')?.content || parsedUrl.hostname,
+      author: doc.querySelector('.byline-name, meta[name="author"]')?.content || doc.querySelector('.byline-wrapper a')?.textContent || parsedUrl.hostname,
+      authorPhoto,
       date: doc.querySelector('.post-date')?.textContent || '',
       bodyHtml: bodyEl.innerHTML
     };
@@ -215,8 +241,24 @@ document.addEventListener('DOMContentLoaded', () => {
    */
   function renderArticle(data) {
     articleTitle.textContent = data.title;
-    articleSubtitle.textContent = data.subtitle;
-    articleMeta.textContent = [data.author, data.date].filter(Boolean).join(' • ');
+    
+    if (data.subtitle) {
+      articleSubtitle.textContent = data.subtitle;
+      articleSubtitle.classList.remove('hidden');
+    } else {
+      articleSubtitle.classList.add('hidden');
+    }
+
+    // Author Byline & Avatar Thumbnail
+    authorName.textContent = data.author;
+    articleDate.textContent = data.date;
+
+    if (data.authorPhoto) {
+      authorAvatar.src = data.authorPhoto;
+      authorAvatar.classList.remove('hidden');
+    } else {
+      authorAvatar.classList.add('hidden');
+    }
 
     // Inject Raw Body HTML
     articleBody.innerHTML = data.bodyHtml;
@@ -234,10 +276,9 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   /**
-   * Core Footnote Processing Engine (Fixed)
+   * Core Footnote Processing Engine
    */
   function processAndFixFootnotes() {
-    // 1. Identify all in-text links first
     const inTextLinks = articleBody.querySelectorAll(
       'a.footnote-number, a[href*="#footnote"], a[href*="#fn"], sup a'
     );
@@ -248,7 +289,6 @@ document.addEventListener('DOMContentLoaded', () => {
       if (id) inTextIds.add(id.toLowerCase());
     });
 
-    // 2. Query ONLY bottom footnote containers (Excluding in-text <a> links or anchor IDs)
     const rawCandidates = articleBody.querySelectorAll(
       '.footnote, .footnotes li, p.footnote, div[id*="footnote"], li[id*="fn"], [data-footnote]'
     );
@@ -256,7 +296,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const footnoteMap = new Map();
 
     rawCandidates.forEach((el, index) => {
-      // Ignore if element is an <a> tag or an in-text anchor
       if (el.tagName === 'A') return;
       
       const elId = (el.getAttribute('id') || '').toLowerCase();
@@ -270,15 +309,12 @@ document.addEventListener('DOMContentLoaded', () => {
         el.setAttribute('id', finalId);
       }
 
-      // Clone element for clean text extraction
       const cleanClone = el.cloneNode(true);
 
-      // Remove back links and inline footnote number markers inside bottom text
       cleanClone.querySelectorAll('.footnote-back, .footnote-backref, a[href*="anchor"], a[href*="ref"], .footnote-number').forEach(node => node.remove());
 
       let cleanHtml = cleanClone.innerHTML.trim();
 
-      // Strip leading digits like "1." or "1 " if left over in paragraph
       cleanHtml = cleanHtml.replace(/^\s*<p>\s*\d+[\.\s]*/i, '<p>');
       cleanHtml = cleanHtml.replace(/^\s*\d+[\.\s]*/i, '');
 
@@ -286,14 +322,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
       footnoteMap.set(finalId, cleanHtml);
 
-      // Also map plain number string (e.g. "1" -> cleanHtml)
       const numMatch = finalId.match(/\d+/);
       if (numMatch) {
         footnoteMap.set(numMatch[0], cleanHtml);
       }
     });
 
-    // 3. Attach interactive popover handlers to all in-text links
     inTextLinks.forEach((link) => {
       const href = link.getAttribute('href') || '';
       const linkText = link.textContent.trim().replace(/[\[\]]/g, '');
@@ -303,10 +337,8 @@ document.addEventListener('DOMContentLoaded', () => {
         targetId = `footnote-${linkText}`;
       }
 
-      // Look up content from Map
       let content = footnoteMap.get(targetId) || footnoteMap.get(linkText);
 
-      // Fallback: If not found in map, attempt DOM search by element with targetId
       if (!content && targetId) {
         const directEl = articleBody.querySelector(`#${targetId}`);
         if (directEl && directEl.tagName !== 'A') {
@@ -314,12 +346,10 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       }
 
-      // Enhance Link Styling
       link.classList.add('interactive-footnote');
       link.setAttribute('role', 'button');
       link.setAttribute('title', `Footnote [${linkText}]`);
 
-      // Override click event to show popover modal
       link.addEventListener('click', (e) => {
         e.preventDefault();
         e.stopPropagation();

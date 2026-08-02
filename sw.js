@@ -1,10 +1,10 @@
-const CACHE_NAME = 'substack-reader-v1';
+const CACHE_NAME = 'substack-reader-v2';
 const ASSETS = [
-  '/',
-  '/index.html',
-  '/style.css',
-  '/app.js',
-  '/manifest.json'
+  './',
+  './index.html',
+  './style.css',
+  './app.js',
+  './manifest.json'
 ];
 
 self.addEventListener('install', (e) => {
@@ -14,8 +14,7 @@ self.addEventListener('install', (e) => {
 });
 
 self.addEventListener('fetch', (e) => {
-  // Pass API and external CORS requests network-first
-  if (e.request.url.includes('substack') || e.request.url.includes('cors')) {
+  if (e.request.url.includes('substack') || e.request.url.includes('cors') || e.request.url.includes('allorigins')) {
     return;
   }
   e.respondWith(

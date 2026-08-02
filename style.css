@@ -1,49 +1,54 @@
-/* Reset & Base Variables */
+/* Reset & Base Variables - Matching Substack Native Typography */
 :root {
-  --bg-color: #fcfcfc;
+  --bg-color: #ffffff;
   --card-bg: #ffffff;
-  --text-primary: #1a1a1a;
-  --text-secondary: #555555;
+  --text-primary: #242424;
+  --text-secondary: #6b6b6b;
   --brand-orange: #ff6719;
   --brand-orange-hover: #e0550d;
-  --border-color: #e2e8f0;
-  --footnote-bg: #fff3eb;
+  --border-color: #e6e6e6;
+  --footnote-bg: #fff5ee;
   --footnote-border: #ff6719;
-  --shadow-sm: 0 2px 8px rgba(0,0,0,0.06);
-  --shadow-lg: 0 10px 30px rgba(0,0,0,0.15);
-  --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Georgia, serif;
-  --font-size-base: 18px;
-  --line-height: 1.68;
+  --shadow-sm: 0 1px 4px rgba(0,0,0,0.05);
+  --shadow-lg: 0 12px 32px rgba(0,0,0,0.18);
+  --font-serif: Georgia, Cambria, "Times New Roman", Times, serif;
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-family: var(--font-serif);
+  --font-size-base: 20px;
+  --line-height: 1.62;
 }
 
 /* Theme Variants */
 body.theme-dark {
   --bg-color: #121212;
-  --card-bg: #1e1e1e;
-  --text-primary: #e0e0e0;
-  --text-secondary: #a0a0a0;
-  --border-color: #2e2e2e;
+  --card-bg: #1a1a1a;
+  --text-primary: #e6e6e6;
+  --text-secondary: #999999;
+  --border-color: #2c2c2c;
   --footnote-bg: #2a1f18;
   --shadow-sm: 0 2px 8px rgba(0,0,0,0.3);
   --shadow-lg: 0 10px 30px rgba(0,0,0,0.5);
 }
 
 body.theme-sepia {
-  --bg-color: #f4ecd8;
-  --card-bg: #fbf0d9;
-  --text-primary: #5b4636;
-  --text-secondary: #7f6a58;
+  --bg-color: #fbf0d9;
+  --card-bg: #f8e8d0;
+  --text-primary: #4a3828;
+  --text-secondary: #705b4a;
   --border-color: #e3d3b7;
-  --footnote-bg: #eae0c8;
+  --footnote-bg: #eddcb7;
 }
 
-/* Font Size Modifiers */
-body.font-small { --font-size-base: 16px; }
-body.font-medium { --font-size-base: 18px; }
-body.font-large { --font-size-base: 21px; }
+/* Font Family & Size Modifiers */
+body.font-serif { --font-family: var(--font-serif); }
+body.font-sans { --font-family: var(--font-sans); }
+
+body.font-small { --font-size-base: 17px; }
+body.font-medium { --font-size-base: 20px; }
+body.font-large { --font-size-base: 23px; }
 
 * {
-  box-sizing: border-box;
+  box-sizing: border-color;
   margin: 0;
   padding: 0;
 }
@@ -54,6 +59,7 @@ body {
   font-family: var(--font-family);
   font-size: var(--font-size-base);
   line-height: var(--line-height);
+  letter-spacing: -0.003em;
   transition: background-color 0.25s ease, color 0.25s ease;
   min-height: 100vh;
   display: flex;
@@ -68,7 +74,7 @@ body {
   background-color: var(--card-bg);
   border-bottom: 1px solid var(--border-color);
   box-shadow: var(--shadow-sm);
-  padding: 12px 20px;
+  padding: 10px 18px;
 }
 
 .header-container {
@@ -83,8 +89,9 @@ body {
   display: flex;
   align-items: center;
   gap: 8px;
+  font-family: var(--font-sans);
   font-weight: 700;
-  font-size: 1.1rem;
+  font-size: 1.05rem;
   color: var(--brand-orange);
 }
 
@@ -97,9 +104,10 @@ body {
   background: var(--bg-color);
   border: 1px solid var(--border-color);
   color: var(--text-primary);
-  padding: 6px 12px;
+  padding: 5px 12px;
   border-radius: 20px;
-  font-size: 0.9rem;
+  font-family: var(--font-sans);
+  font-size: 0.85rem;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s;
@@ -112,7 +120,7 @@ body {
 
 /* URL Bar Section */
 .url-bar-section {
-  padding: 16px 20px;
+  padding: 14px 18px;
   background-color: var(--card-bg);
   border-bottom: 1px solid var(--border-color);
 }
@@ -129,11 +137,12 @@ body {
 
 .url-form input {
   flex: 1;
-  padding: 12px 16px;
+  padding: 10px 14px;
   border: 1px solid var(--border-color);
   border-radius: 8px;
   background-color: var(--bg-color);
   color: var(--text-primary);
+  font-family: var(--font-sans);
   font-size: 0.95rem;
   outline: none;
   transition: border-color 0.2s;
@@ -147,8 +156,9 @@ body {
   background-color: var(--brand-orange);
   color: #ffffff;
   border: none;
-  padding: 12px 22px;
+  padding: 10px 20px;
   border-radius: 8px;
+  font-family: var(--font-sans);
   font-weight: 600;
   cursor: pointer;
   transition: background-color 0.2s;
@@ -159,13 +169,14 @@ body {
 }
 
 .share-status {
-  margin-top: 10px;
+  margin-top: 8px;
+  font-family: var(--font-sans);
   font-size: 0.85rem;
   color: var(--brand-orange);
   font-weight: 600;
 }
 
-/* Main Content Area */
+/* Main Content Area - Substack Column Width (720px) */
 .main-content {
   flex: 1;
   max-width: 760px;
@@ -180,37 +191,50 @@ body {
   border-radius: 12px;
   padding: 28px;
   box-shadow: var(--shadow-sm);
-  margin-top: 20px;
+  margin-top: 10px;
 }
 
 .welcome-card h2 {
   color: var(--brand-orange);
   margin-bottom: 12px;
+  font-family: var(--font-sans);
   font-size: 1.5rem;
+}
+
+.welcome-card p {
+  font-family: var(--font-sans);
+  font-size: 0.95rem;
+  color: var(--text-secondary);
 }
 
 .feature-grid {
   display: grid;
-  gap: 16px;
-  margin-top: 24px;
+  gap: 14px;
+  margin-top: 20px;
 }
 
 .feature-item {
   display: flex;
-  gap: 14px;
+  gap: 12px;
   align-items: flex-start;
   padding: 12px;
   background-color: var(--bg-color);
   border-radius: 8px;
   border: 1px solid var(--border-color);
+  font-family: var(--font-sans);
 }
 
 .feature-icon {
-  font-size: 1.5rem;
+  font-size: 1.4rem;
+}
+
+.feature-item strong {
+  font-size: 0.95rem;
+  display: block;
 }
 
 .feature-item p {
-  font-size: 0.88rem;
+  font-size: 0.85rem;
   color: var(--text-secondary);
   margin-top: 2px;
 }
@@ -219,11 +243,12 @@ body {
 .spinner-container {
   text-align: center;
   padding: 60px 20px;
+  font-family: var(--font-sans);
 }
 
 .spinner {
-  width: 44px;
-  height: 44px;
+  width: 42px;
+  height: 42px;
   border: 4px solid var(--border-color);
   border-top-color: var(--brand-orange);
   border-radius: 50%;
@@ -242,6 +267,7 @@ body {
   padding: 24px;
   text-align: center;
   margin-top: 20px;
+  font-family: var(--font-sans);
 }
 
 .error-icon {
@@ -265,59 +291,137 @@ body {
   cursor: pointer;
 }
 
-/* Article Styling */
+/* Substack Article Container & Header */
 .article-container {
   background-color: var(--card-bg);
   border: 1px solid var(--border-color);
   border-radius: 12px;
-  padding: 36px 32px;
+  padding: 44px 36px;
   box-shadow: var(--shadow-sm);
   margin-top: 10px;
 }
 
+.article-header {
+  margin-bottom: 32px;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 24px;
+}
+
 .article-title {
-  font-size: 2rem;
-  line-height: 1.25;
-  margin-bottom: 12px;
+  font-family: var(--font-serif);
+  font-size: 2.25rem;
+  font-weight: 700;
+  line-height: 1.22;
+  letter-spacing: -0.015em;
+  margin-bottom: 14px;
   color: var(--text-primary);
 }
 
 .article-subtitle {
-  font-size: 1.15rem;
+  font-family: var(--font-serif);
+  font-size: 1.25rem;
   color: var(--text-secondary);
-  margin-bottom: 18px;
   line-height: 1.45;
+  margin-bottom: 24px;
 }
 
-.article-meta {
-  font-size: 0.88rem;
+/* Substack Author Byline Layout */
+.author-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding-top: 8px;
+}
+
+.author-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1px solid var(--border-color);
+}
+
+.author-details {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.author-name {
+  font-family: var(--font-sans);
+  font-weight: 600;
+  font-size: 0.98rem;
+  color: var(--text-primary);
+}
+
+.article-date {
+  font-family: var(--font-sans);
+  font-size: 0.85rem;
   color: var(--text-secondary);
-  border-bottom: 1px solid var(--border-color);
-  padding-bottom: 16px;
-  margin-bottom: 28px;
+  margin-top: 2px;
+}
+
+/* Substack Body Typography & Margins */
+.article-body {
+  font-family: var(--font-family);
 }
 
 .article-body p {
-  margin-bottom: 1.4em;
+  margin-bottom: 1.5em;
 }
+
+.article-body h1, .article-body h2, .article-body h3, .article-body h4 {
+  font-family: var(--font-sans);
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1.3;
+  margin-top: 1.8em;
+  margin-bottom: 0.6em;
+}
+
+.article-body h2 { font-size: 1.55rem; }
+.article-body h3 { font-size: 1.3rem; }
 
 .article-body img {
   max-width: 100%;
   height: auto;
-  border-radius: 8px;
-  margin: 1.5em 0;
+  border-radius: 4px;
+  margin: 1.8em auto;
+  display: block;
+}
+
+.article-body figure {
+  margin: 1.8em 0;
+  text-align: center;
+}
+
+.article-body figcaption {
+  font-family: var(--font-sans);
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  margin-top: 8px;
 }
 
 .article-body blockquote {
-  border-left: 4px solid var(--brand-orange);
-  padding-left: 16px;
-  margin: 1.5em 0;
+  border-left: 3px solid var(--text-primary);
+  padding-left: 20px;
+  margin: 1.8em 0;
   font-style: italic;
   color: var(--text-secondary);
+  font-size: 1.08rem;
 }
 
-/* Interactive Footnotes */
-.footnote-number-link, .interactive-footnote {
+.article-body ul, .article-body ol {
+  margin-bottom: 1.5em;
+  padding-left: 28px;
+}
+
+.article-body li {
+  margin-bottom: 0.5em;
+}
+
+/* Interactive Footnote Badge */
+.interactive-footnote {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -325,7 +429,8 @@ body {
   color: var(--brand-orange) !important;
   border: 1px solid var(--footnote-border);
   border-radius: 12px;
-  font-size: 0.78rem;
+  font-family: var(--font-sans);
+  font-size: 0.76rem;
   font-weight: 700;
   padding: 1px 7px;
   margin: 0 2px;
@@ -341,7 +446,6 @@ body {
   color: #ffffff !important;
 }
 
-/* Highlight target footnote at bottom */
 .footnote-highlight {
   animation: pulseHighlight 2s ease-out;
   border-left: 4px solid var(--brand-orange);
@@ -364,7 +468,6 @@ body {
   align-items: flex-end;
   justify-content: center;
   backdrop-filter: blur(2px);
-  transition: opacity 0.25s ease;
 }
 
 .footnote-bottom-sheet {
@@ -379,8 +482,6 @@ body {
   padding: 20px 24px;
   display: flex;
   flex-direction: column;
-  transform: translateY(0);
-  transition: transform 0.25s ease;
 }
 
 .sheet-header {
@@ -389,6 +490,7 @@ body {
   align-items: center;
   padding-bottom: 12px;
   border-bottom: 1px solid var(--border-color);
+  font-family: var(--font-sans);
 }
 
 .footnote-badge {
@@ -422,6 +524,7 @@ body {
   padding-top: 12px;
   border-top: 1px solid var(--border-color);
   text-align: center;
+  font-family: var(--font-sans);
 }
 
 .text-btn {
@@ -445,6 +548,7 @@ body {
   border: none;
   padding: 12px 20px;
   border-radius: 30px;
+  font-family: var(--font-sans);
   font-weight: 600;
   font-size: 0.9rem;
   box-shadow: var(--shadow-lg);
@@ -463,12 +567,12 @@ body {
 
 @media (max-width: 600px) {
   .article-container {
-    padding: 20px 16px;
+    padding: 24px 18px;
     border-radius: 0;
     border-left: none;
     border-right: none;
   }
   .article-title {
-    font-size: 1.65rem;
+    font-size: 1.75rem;
   }
 }
