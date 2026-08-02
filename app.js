@@ -140,7 +140,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     try {
-      // Step 1: Try Substack API or CORS Proxies
       const articleData = await fetchArticleContent(cleanUrl);
       renderArticle(articleData);
     } catch (err) {
@@ -157,7 +156,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const domain = parsedUrl.origin;
     const pathSegments = parsedUrl.pathname.split('/').filter(Boolean);
     
-    // Check if it's a standard /p/post-slug URL
     let slug = '';
     if (pathSegments.includes('p')) {
       const pIdx = pathSegments.indexOf('p');
@@ -166,7 +164,7 @@ document.addEventListener('DOMContentLoaded', () => {
       slug = pathSegments[pathSegments.length - 1];
     }
 
-    // Try strategy 1: Substack's public API endpoint via CORS proxy
+    // Strategy 1: Substack's public API endpoint via CORS proxy
     const apiUrl = `${domain}/api/v1/posts/${slug}`;
     const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(apiUrl)}`;
 
@@ -188,7 +186,7 @@ document.addEventListener('DOMContentLoaded', () => {
       console.log('API strategy failed, attempting full page HTML fetch fallback...');
     }
 
-    // Try strategy 2: Direct full HTML fetch via AllOrigins proxy
+    // Strategy 2: Direct full HTML fetch via AllOrigins proxy
     const htmlProxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`;
     const htmlRes = await fetch(htmlProxyUrl);
     if (!htmlRes.ok) {
@@ -236,54 +234,87 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   /**
-   * Core Footnote Processing Engine
+   * Core Footnote Processing Engine (Fixed)
    */
   function processAndFixFootnotes() {
-    // 1. Map out all footnote targets at the bottom of the article
-    const footnoteElements = articleBody.querySelectorAll(
-      '.footnote, .footnote-content, [id^="footnote"], [id^="fn"], ol.footnotes li'
+    // 1. Identify all in-text links first
+    const inTextLinks = articleBody.querySelectorAll(
+      'a.footnote-number, a[href*="#footnote"], a[href*="#fn"], sup a'
+    );
+
+    const inTextIds = new Set();
+    inTextLinks.forEach(link => {
+      const id = link.getAttribute('id');
+      if (id) inTextIds.add(id.toLowerCase());
+    });
+
+    // 2. Query ONLY bottom footnote containers (Excluding in-text <a> links or anchor IDs)
+    const rawCandidates = articleBody.querySelectorAll(
+      '.footnote, .footnotes li, p.footnote, div[id*="footnote"], li[id*="fn"], [data-footnote]'
     );
 
     const footnoteMap = new Map();
 
-    footnoteElements.forEach((el, index) => {
-      let id = el.getAttribute('id');
-      if (!id) {
-        id = `footnote-${index + 1}`;
-        el.setAttribute('id', id);
+    rawCandidates.forEach((el, index) => {
+      // Ignore if element is an <a> tag or an in-text anchor
+      if (el.tagName === 'A') return;
+      
+      const elId = (el.getAttribute('id') || '').toLowerCase();
+      if (elId.includes('anchor') || elId.includes('ref') || inTextIds.has(elId)) {
+        return;
       }
-      
-      // Clean up footnote back-links inside bottom text
+
+      let finalId = elId;
+      if (!finalId) {
+        finalId = `footnote-${index + 1}`;
+        el.setAttribute('id', finalId);
+      }
+
+      // Clone element for clean text extraction
       const cleanClone = el.cloneNode(true);
-      cleanClone.querySelectorAll('.footnote-back, a[href*="#footnote-anchor"]').forEach(a => a.remove());
-      
-      footnoteMap.set(id.toLowerCase(), cleanClone.innerHTML.trim());
-      // Also map simplified numbers (e.g., "1" -> "footnote-1")
-      const numMatch = id.match(/\d+/);
+
+      // Remove back links and inline footnote number markers inside bottom text
+      cleanClone.querySelectorAll('.footnote-back, .footnote-backref, a[href*="anchor"], a[href*="ref"], .footnote-number').forEach(node => node.remove());
+
+      let cleanHtml = cleanClone.innerHTML.trim();
+
+      // Strip leading digits like "1." or "1 " if left over in paragraph
+      cleanHtml = cleanHtml.replace(/^\s*<p>\s*\d+[\.\s]*/i, '<p>');
+      cleanHtml = cleanHtml.replace(/^\s*\d+[\.\s]*/i, '');
+
+      if (!cleanHtml) return;
+
+      footnoteMap.set(finalId, cleanHtml);
+
+      // Also map plain number string (e.g. "1" -> cleanHtml)
+      const numMatch = finalId.match(/\d+/);
       if (numMatch) {
-        footnoteMap.set(numMatch[0], cleanClone.innerHTML.trim());
+        footnoteMap.set(numMatch[0], cleanHtml);
       }
     });
 
-    // 2. Find all footnote links inside article text
-    const footnoteLinks = articleBody.querySelectorAll(
-      'a.footnote-number, a[href*="#footnote"], a[href*="#fn"], sup a'
-    );
-
-    footnoteLinks.forEach((link, idx) => {
+    // 3. Attach interactive popover handlers to all in-text links
+    inTextLinks.forEach((link) => {
       const href = link.getAttribute('href') || '';
       const linkText = link.textContent.trim().replace(/[\[\]]/g, '');
       
-      // Determine target footnote ID
       let targetId = href.replace('#', '').toLowerCase();
-      if (!targetId || targetId === '') {
+      if (targetId.includes('anchor') || targetId.includes('ref')) {
         targetId = `footnote-${linkText}`;
       }
 
-      // Check if we have content in footnoteMap
+      // Look up content from Map
       let content = footnoteMap.get(targetId) || footnoteMap.get(linkText);
 
-      // Enhance Link Appearance
+      // Fallback: If not found in map, attempt DOM search by element with targetId
+      if (!content && targetId) {
+        const directEl = articleBody.querySelector(`#${targetId}`);
+        if (directEl && directEl.tagName !== 'A') {
+          content = directEl.innerHTML;
+        }
+      }
+
+      // Enhance Link Styling
       link.classList.add('interactive-footnote');
       link.setAttribute('role', 'button');
       link.setAttribute('title', `Footnote [${linkText}]`);
@@ -296,7 +327,7 @@ document.addEventListener('DOMContentLoaded', () => {
         lastReadingPosition = window.scrollY;
         activeFootnoteId = targetId;
 
-        openFootnoteModal(linkText, content || 'Footnote text not found at bottom of page.');
+        openFootnoteModal(linkText, content || 'Footnote text not found.');
       });
     });
   }
