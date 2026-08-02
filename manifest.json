@@ -2,7 +2,8 @@
   "name": "Substack Footnote Reader",
   "short_name": "Substack Reader",
   "description": "Read Substack articles with fully working interactive footnotes and Android Share Target support.",
-  "start_url": "/",
+  "start_url": "./",
+  "scope": "./",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#ffffff",
@@ -20,7 +21,7 @@
     }
   ],
   "share_target": {
-    "action": "/",
+    "action": "./",
     "method": "GET",
     "params": {
       "title": "title",
